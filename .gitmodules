@@ -1,0 +1,6 @@
+[submodule "F to C converter"]
+	path = F to C converter
+	url = .\\f_to_c_converter\\
+[submodule "Simple Calculator"]
+	path = Simple Calculator
+	url = .\\simple_calc\\
