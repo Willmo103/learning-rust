@@ -2,61 +2,114 @@ use std::env::args;
 // use std::fs;
 use std::path::Path;
 
-// fn main() {
-//     let _args = args().collect::<Vec<String>>();
-//     let dir: String = _args[1].clone();
-//     let dir_path = Path::new(&dir);
-//     println!("Sorting files in {}...", dir);
-// }
+struct FileSorter<'a> {
+    documents: Vec<&'a str>,
+    images: Vec<&'a str>,
+    audio: Vec<&'a str>,
+    video: Vec<&'a str>,
+    compressed: Vec<&'a str>,
+    executables: Vec<&'a str>,
+    code: Vec<&'a str>,
+    root: &'a Path,
+    folder_names: Vec<&'a str>,
+}
 
-// fn get_file_extension(file_name: String) -> String {
-//     let mut file_extension: String = String::new();
-//     let mut file_name_chars = file_name.chars();
-//     let mut char = file_name_chars.next();
-//     while char != None {
-//         if char == Some('.') {
-//             file_extension = String::new();
-//         } else {
-//             file_extension.push(char.unwrap());
-//         }
-//         char = file_name_chars.next();
-//     }
-//     file_extension
-// }
+impl<'a> FileSorter<'a> {
+    fn new(root: &'a Path) -> Self {
+        let documents = vec![
+            ".pdf", ".doc", ".docx", ".txt", ".rtf", ".odt", ".pages", ".epub", ".md", ".csv",
+            ".xls", ".xlsx", ".ppt", ".pptx", ".odp", ".numbers", ".key",
+        ];
 
-// fn get_files(dir: &Path) -> Vec<String> {
-//     let mut files = Vec::new();
-//     let dir_entries = fs::read_dir(dir);
-//     match dir_entries {
-//         Ok(entries) => {
-//             for entry in entries {
-//                 let entry = entry.unwrap();
-//                 let file_name = entry.file_name().into_string().unwrap();
-//                 let file_extension = get_file_extension(file_name);
-//                 if file_extension != "" {
-//                     files.push(file_name);
-//                 }
-//             }
-//         }
-//         Err(_) => {
-//             println!("Error reading directory entries.");
-//         }
-//     }
+        let images = vec![
+            ".jpg", ".jpeg", ".png", ".gif", ".svg", ".bmp", ".tiff", ".tif", ".psd", ".ai", ".raw",
+        ];
 
-//     files
-// }
+        let audio = vec![
+            ".mp3", ".wav", ".aiff", ".aif", ".aifc", ".flac", ".m4a", ".wma", ".aac", ".pcm",
+            ".ogg", ".oga", ".opus", ".webm",
+        ];
 
-// fn check_for_dir(file_ext: String, dir: String) -> std::path::PathBuf {
-//     let mut dir_path = std::path::PathBuf::new();
-//     if fs::join(dir, file_ext).is_dir() {
-//         // println!("{} is a directory.", file_ext);
-//     } else {
-//         //print creating directory: dir path, sep, file_ext
-//         println!("Creating directory: {}{}{}", dir, std::path::MAIN_SEPARATOR, file_ext);
-//         // Create directory
-//         fs::create_dir(fs::join(dir, file_ext)).unwrap();
-//     }
-// }
+        let video = vec![
+            ".mp4", ".mov", ".avi", ".wmv", ".mpg", ".mpeg", ".mkv", ".flv", ".3gp", ".3g2",
+            ".m4v", ".webm", ".ogv",
+        ];
+
+        let compressed = vec![
+            ".zip", ".rar", ".7z", ".gz", ".bz2", ".tar", ".iso", ".dmg", ".pkg", ".deb", ".rpm",
+        ];
+
+        let executables = vec![
+            ".exe", ".msi", ".bin", ".sh", ".bat", ".jar", ".app", ".apk", ".dmg", ".pkg", ".deb",
+            ".rpm",
+        ];
+
+        let code = vec![
+            ".html", ".css", ".js", ".ts", ".jsx", ".tsx", ".php", ".py", ".rb", ".java", ".c",
+            ".cpp", ".h", ".cs", ".go", ".swift", ".rs", ".pl", ".sql", ".xml", ".json", ".yml",
+            ".yaml", ".toml", ".md",
+        ];
+        let root: &Path = root;
+        let folder_names = vec![
+            "Documents",
+            "Images",
+            "Audio",
+            "Video",
+            "Compressed",
+            "Executables",
+            "Code",
+        ];
+
+        FileSorter {
+            documents,
+            images,
+            audio,
+            video,
+            compressed,
+            executables,
+            code,
+            root,
+            folder_names,
+        }
+    }
+
+    fn check_dir(&self, file_tup: (&Path, &str)) -> &Path {
+        let file_path = file_tup.0;
+        let file_ext = file_tup.1;
+        let mut dir_path = self.root.to_path_buf();
+        let mut dir_name = String::new();
+        if self.documents.contains(&file_ext) {
+            dir_name = self.folder_names[0].to_string();
+        } else if self.images.contains(&file_ext) {
+            dir_name = self.folder_names[1].to_string();
+        } else if self.audio.contains(&file_ext) {
+            dir_name = self.folder_names[2].to_string();
+        } else if self.video.contains(&file_ext) {
+            dir_name = self.folder_names[3].to_string();
+        } else if self.compressed.contains(&file_ext) {
+            dir_name = self.folder_names[4].to_string();
+        } else if self.executables.contains(&file_ext) {
+            dir_name = self.folder_names[5].to_string();
+        } else if self.code.contains(&file_ext) {
+            dir_name = self.folder_names[6].to_string();
+        } else {
+            dir_name = "Other".to_string();
+        }
+        dir_path.push(dir_name);
+        if !dir_path.exists() {
+            fs::create_dir(&dir_path).expect("Could not create directory");
+        }
+        dir_path.as_path()
+    }
+
+    fn sort_files(&self, files: Vec<(&Path, &str)>) {
+        for file in files {
+            let dir_path = self.check_dir(file);
+            fs::rename(file.0, dir_path.join(file.0.file_name().unwrap()))
+                .expect("Could not move file");
+        }
+    }
+}
 
 fn main() {
     let args: Vec<String> = args().collect();
@@ -80,29 +133,27 @@ fn main() {
 // 2. fill the vector with the file's absolute path and extension
 //    via calling the get_file_extension function
 */
-// fn list_files(path: &Path) -> Vec<(&Path, &String)> {}
+fn list_files(path: &Path) -> Vec<(&Path, &String)> {
+    let mut files: Vec<(&Path, &String)> = Vec::new();
+    for entry in fs::read_dir(path).expect("Could not read directory") {
+        let entry = entry.expect("Could not get entry");
+        let file_path = entry.path();
+        if file_path.is_file() {
+            let file_ext = get_file_extension(&file_path);
+            files.push((&file_path, &file_ext));
+        }
+    }
+    files
+}
 
 /*
 this function will:
 1. take a Path argument and parse the file name to get the extension
 2. return the extension as a String
 */
-// fn get_file_extension(file_path: &Path) -> String {}
-
-/*
-this function will:
-iterate through the vector of tuples: (Path, String) and:
-    1. check if a directory corresponding to the file extension exists,
-       if not, create it using the check_for_dir function.
-       (check_for_dir will return the path to the directory)
-    2. move the file to the directory corresponding to the file extension
-*/
-// fn sort_files(root: &Path, files: Vec<(&Path, &String)>) {}
-
-/*
-this function will:
-1. take a tuple of (Path, String) and check if a directory exists
-   corresponding to the file extension, if not, create it.
-2. return the path to the directory
-*/
-// fn check_for_dir(file_tup: (Path, String)) -> Path {}
+fn get_file_extension(file_path: &Path) -> String {
+    let file_name = file_path.file_name().unwrap().to_str().unwrap();
+    let file_name_split: Vec<&str> = file_name.split('.').collect();
+    let file_ext = file_name_split[file_name_split.len() - 1];
+    file_ext.to_string()
+}
