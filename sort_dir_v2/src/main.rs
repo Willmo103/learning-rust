@@ -1,3 +1,29 @@
+/*
+GPT Prompt:
+Project 3: File Organizer
+
+You're going to create a program that organizes files in a directory by their extensions.
+
+Here's how it should work:
+
+The user provides a directory path as a command line argument.
+The program goes through each file in the directory.
+For each file, it checks the file extension.
+If a directory for that extension doesn't exist, it creates one.
+It then moves the file into the directory of its respective extension.
+In order to work with file systems in Rust, you'll need to use the std::fs
+and std::path modules. The std::env module will also be useful for dealing
+with command line arguments. Be sure to handle potential errors, such as
+missing permissions or invalid input.
+
+Please note that this is a more advanced project and will require some independent
+research, but I think you're ready for it.
+
+Once you've completed the project, you can share your code here and I'll provide
+feedback and a grade. I'm here to help if you have any questions along the way.
+Good luck!
+*/
+
 use std::env::args;
 use std::fs;
 use std::path::Path;
@@ -121,3 +147,61 @@ fn sort_file(file_path: String, root_dir: &String, file_type: String) {
     let new_path = Path::new(&root_dir).join(file_type).join(file_name);
     fs::rename(file_path, new_path).unwrap();
 }
+/*
+
+GPT Grade:
+Great work! This is an impressive implementation of the file organizer project. Let's break it down:
+
+Correctness: Your code correctly implements the project requirements.
+It organizes the files in the provided directory by their extensions,
+creating new directories as needed. You've also gone above and beyond
+by sorting the files into categories based on their extensions, rather
+than just using the extensions themselves as directory names.
+
+Code Quality:
+Your code is well-structured and broken down into functions,
+each with a clear responsibility. This makes the code easier to read and
+understand. The use of Rust's Path and fs modules is appropriate and you've
+used them effectively.
+
+Efficiency:
+The program is efficient in its operations, only iterating over the directory
+contents once and performing a minimum number of file system operations.
+
+Grade: A+
+
+Here are a few potential improvements:
+
+Error Handling:
+While your code uses unwrap() to handle potential errors, it would be even
+better to handle these errors more gracefully. For example, you could provide a
+user-friendly error message when a directory cannot be created or a file
+cannot be moved. This would make the program more robust and easier to use.
+
+Code Quality:
+You've repeated some similar code in functions like is_audio,
+is_video, is_document, etc. You could create a generic function
+that accepts a file extension and a list of extensions,
+and returns whether the file extension is in the list.
+This would make your code DRYer (Don't Repeat Yourself).
+
+Here's an example of what this function might look like:
+
+fn is_file_type(file_extension: &str, valid_extensions: &[&str]) -> bool {
+    valid_extensions.contains(&file_extension)
+}
+
+You could then use this function in your other is_ functions like so:
+
+fn is_audio(file_extension: &str) -> bool {
+    let audio_extensions = ["mp3", "wav", "flac", "m4a", "aac", "ogg"];
+    is_file_type(file_extension, &audio_extensions)
+}
+Scalability: If you were to scale this up for larger directories, you might run into performance issues. As a potential improvement, you could look into using asynchronous programming to handle file operations concurrently. This would be a more advanced topic, but it could be a good challenge if you're interested in learning more about Rust's async features.
+Great work on this project! Let me know if you're ready for the next one.
+
+
+
+
+
+*/
