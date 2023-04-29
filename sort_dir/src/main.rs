@@ -1,6 +1,6 @@
 use std::env::args;
-// use std::fs;
-use std::path::Path;
+use std::fs;
+use std::path::{Path, PathBuf};
 
 struct FileSorter<'a> {
     documents: Vec<&'a str>,
@@ -73,8 +73,7 @@ impl<'a> FileSorter<'a> {
         }
     }
 
-    fn check_dir(&self, file_tup: (&Path, &str)) -> &Path {
-        let file_path = file_tup.0;
+    fn check_dir(&self, file_tup: (&Path, &str)) -> PathBuf {
         let file_ext = file_tup.1;
         let mut dir_path = self.root.to_path_buf();
         let mut dir_name = String::new();
@@ -99,7 +98,7 @@ impl<'a> FileSorter<'a> {
         if !dir_path.exists() {
             fs::create_dir(&dir_path).expect("Could not create directory");
         }
-        dir_path.as_path()
+        dir_path
     }
 
     fn sort_files(&self, files: Vec<(&Path, &str)>) {
@@ -133,14 +132,14 @@ fn main() {
 // 2. fill the vector with the file's absolute path and extension
 //    via calling the get_file_extension function
 */
-fn list_files(path: &Path) -> Vec<(&Path, &String)> {
-    let mut files: Vec<(&Path, &String)> = Vec::new();
+fn list_files(path: &Path) -> Vec<(Path, &str(+))> {
+    let mut files: Vec<(Path, &str)> = Vec::new();
     for entry in fs::read_dir(path).expect("Could not read directory") {
         let entry = entry.expect("Could not get entry");
         let file_path = entry.path();
         if file_path.is_file() {
-            let file_ext = get_file_extension(&file_path);
-            files.push((&file_path, &file_ext));
+            let file_ext = get_file_extension(&mut file_path);
+            files.push((file_path, file_ext));
         }
     }
     files
@@ -151,9 +150,8 @@ this function will:
 1. take a Path argument and parse the file name to get the extension
 2. return the extension as a String
 */
-fn get_file_extension(file_path: &Path) -> String {
+fn get_file_extension(file_path: &mut Path) -> &str {
     let file_name = file_path.file_name().unwrap().to_str().unwrap();
-    let file_name_split: Vec<&str> = file_name.split('.').collect();
-    let file_ext = file_name_split[file_name_split.len() - 1];
-    file_ext.to_string()
+    let file_name_split = file_name.split('.').collect();
+    file_name_split.last().unwrap()
 }
