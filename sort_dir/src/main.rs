@@ -73,7 +73,7 @@ impl<'a> FileSorter<'a> {
         }
     }
 
-    fn check_dir(&self, file_tup: (&Path, &str)) -> PathBuf {
+    fn check_dir(&self, file_tup: (&PathBuf, String)) -> PathBuf {
         let file_ext = file_tup.1;
         let mut dir_path = self.root.to_path_buf();
         let mut dir_name = String::new();
@@ -132,8 +132,8 @@ fn main() {
 // 2. fill the vector with the file's absolute path and extension
 //    via calling the get_file_extension function
 */
-fn list_files(path: &Path) -> Vec<(Path, &str(+))> {
-    let mut files: Vec<(Path, &str)> = Vec::new();
+fn list_files(path: &Path) -> Vec<(PathBuf, String)> {
+    let mut files: Vec<(Path, String)> = Vec::new();
     for entry in fs::read_dir(path).expect("Could not read directory") {
         let entry = entry.expect("Could not get entry");
         let file_path = entry.path();
@@ -153,5 +153,5 @@ this function will:
 fn get_file_extension(file_path: &mut Path) -> &str {
     let file_name = file_path.file_name().unwrap().to_str().unwrap();
     let file_name_split = file_name.split('.').collect();
-    file_name_split.last().unwrap()
+    file_name_split.last().to_String().unwrap()
 }
